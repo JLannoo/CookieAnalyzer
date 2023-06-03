@@ -46,6 +46,7 @@ class CookieAnalyzer {
         this.DOM.mostEfficient.classList.toggle("noMoney", !canBuyBuilding);
 
         if(this.autobuy) this.mostEfficientBuilding.buy();
+        if(this.autoclickgolden) this.autoClickGoldenCoookies();
         this.updateAutoclick();
 
         this.highlightBuilding(this.mostEfficientBuilding.name);
@@ -85,6 +86,7 @@ class CookieAnalyzer {
 
         const autoBuyContainer = this.createCheckbox("autobuy", "Autobuy?");
         const autoClickContainer = this.createCheckbox("autoclick", "Autoclick?");
+        const autoClickGoldenContainer = this.createCheckbox("autoclickgolden", "Autoclick Golden Cookies?");
 
         dataContainer.appendChild(mostEfficient);
         dataContainer.appendChild(efficiency);
@@ -239,6 +241,15 @@ class CookieAnalyzer {
 
     buyMostEfficient(){
         this.mostEfficientBuilding.buy();
+    }
+
+    autoClickGoldenCoookies(){
+        // Probably some better way to do it
+        if(Game.shimmers.length){
+            for(let shimmer of Game.shimmers){
+                shimmer.l.click();
+            }
+        }
     }
 
     updateAutoclick(){
