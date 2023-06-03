@@ -54,6 +54,8 @@ class CookieAnalyzer {
     }
     
     SetupUI(){
+        this.setupTooltipExtension();
+        
         if(this.refreshInterval) clearInterval(this.refreshInterval);
         const adSpace = document.querySelector(CONSTANTS.adElementSelector);
         adSpace.innerHTML = "";
@@ -124,6 +126,49 @@ class CookieAnalyzer {
 
         return $container;
     }
+
+    setupTooltipExtension(){
+        // Replaces the run function onmouseover for every store element
+        for(let building of Game.ObjectsById){            
+            const element = building.l;
+            const mouseover = element.getAttribute("onmouseover");
+            const tooltipFnString = `Game.ObjectsById[${building.id}].tooltip()`;
+
+            // Failsafe to check if script has already been run
+            if(!mouseover.includes(tooltipFnString)) return;
+
+            const [beginning , end] = mouseover.split(tooltipFnString);
+            const newMouseover = beginning + `CA.extendTooltip("${building.name}")` + end;
+        
+            element.setAttribute("onmouseover", newMouseover);
+        }
+    }
+
+    extendTooltip(buildingName){
+        const building = this.getBuildingByID(buildingName);
+        const efficiency = this.calculateCPSPCS(buildingName);
+        
+        const tooltip = building.tooltip();
+
+        // Create new element structure
+        const newBlock = document.createElement("div");
+        newBlock.classList.add("descriptionBlock");
+        const boldText = document.createElement("b");
+        boldText.textContent = efficiency.toFixed(CONSTANTS.efficiencyFloatPrecision);
+
+        newBlock.appendChild(boldText);
+        newBlock.innerHTML += " CPSPCS";
+
+        const newBlockString = newBlock.outerHTML;
+
+        // Insert newBlock before the last </div> in the tooltip string
+        const index = tooltip.lastIndexOf("</div>");
+        const ret = tooltip.substring(0, index) + newBlockString + tooltip.substring(index)
+
+        return ret;
+        
+    }
+    
     
     //   === BUILDINGS ===
     highlightBuilding(id){
