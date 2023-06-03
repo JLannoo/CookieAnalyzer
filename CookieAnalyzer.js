@@ -20,6 +20,7 @@ class CookieAnalyzer {
         this.mostEfficientBuilding = this.getMostEfficientBuilding().building;
         this.autobuy = this.DOM?.autobuy?.checked;
         this.autoclick = this.DOM?.autoclick?.checked;
+        this.autoclickgolden = this.DOM?.autoclickgolden?.checked;
 
         this.DOM = {
             container: undefined,
@@ -55,35 +56,43 @@ class CookieAnalyzer {
     }
     
     SetupUI(){
+        // Replace tooltip function
         this.setupTooltipExtension();
-        
+
+        // Clear previous refresh interval (probably doesn't work)
         if(this.refreshInterval) clearInterval(this.refreshInterval);
+
+        // Select and clear parent element
         const adSpace = document.querySelector(CONSTANTS.adElementSelector);
         adSpace.innerHTML = "";
 
+        // Create mod container
         const CAContainer = document.createElement("section");
         CAContainer.classList.add(CONSTANTS.containerId);
         CAContainer.classList.add("title");
         CAContainer.setAttribute("id", CONSTANTS.containerId);
-
         this.DOM.container = CAContainer;
         CAContainer.innerHTML = `<h2 class="CA-Title">Cookie Analyzer</h2>`;
 
+        // Create data container
         const dataContainer = document.createElement("div");
         dataContainer.classList.add(CONSTANTS.dataContainerId);
         this.DOM.dataContainer = dataContainer;
 
+        // Create buy button
         const mostEfficient = document.createElement("p")
         mostEfficient.classList.add(CONSTANTS.mostEfficientId, "subButton");
         this.DOM.mostEfficient = mostEfficient;
         this.setMostEfficientText(this.mostEfficientBuilding);
         mostEfficient.addEventListener("click", this.buyMostEfficient.bind(this));
 
+        // Create efficiency info
         const efficiency = document.createElement("small");
         efficiency.classList.add(CONSTANTS.efficiencyId);
         this.DOM.efficiency = efficiency;
         this.setEfficiencyText(this.getMostEfficientBuilding());
 
+        // Add checkboxes
         const autoBuyContainer = this.createCheckbox("autobuy", "Autobuy?");
         const autoClickContainer = this.createCheckbox("autoclick", "Autoclick?");
         const autoClickGoldenContainer = this.createCheckbox("autoclickgolden", "Autoclick Golden Cookies?");
@@ -92,6 +101,7 @@ class CookieAnalyzer {
         dataContainer.appendChild(efficiency);
         dataContainer.appendChild(autoBuyContainer);
         dataContainer.appendChild(autoClickContainer);
+        dataContainer.appendChild(autoClickGoldenContainer);
         
         CAContainer.appendChild(dataContainer);
         adSpace.appendChild(CAContainer);
@@ -261,7 +271,7 @@ class CookieAnalyzer {
             this.removeAutoClick();
         }
     }
-
+    
     setAutoclick(){
         this.autoclickInterval = setInterval(() => {
             Game.ClickCookie();
