@@ -46,14 +46,7 @@ class CookieAnalyzer {
         this.DOM.mostEfficient.classList.toggle("noMoney", !canBuyBuilding);
 
         if(this.autobuy) this.mostEfficientBuilding.buy();
-        
-        if(this.autoclick) {
-            if(!this.autoclickInterval) {
-                this.setAutoclick();
-            }
-        } else if(this.autoclickInterval) {
-            this.removeAutoClick();            
-        }
+        this.updateAutoclick();
 
         this.highlightBuilding(this.mostEfficientBuilding.name);
         this.setMostEfficientText();
@@ -201,6 +194,16 @@ class CookieAnalyzer {
 
     buyMostEfficient(){
         this.mostEfficientBuilding.buy();
+    }
+
+    updateAutoclick(){
+        if(this.autoclick) {
+            if(!this.autoclickInterval) {
+                this.setAutoclick();
+            }
+        } else if(this.autoclickInterval) {
+            this.removeAutoClick();
+        }
     }
 
     setAutoclick(){
