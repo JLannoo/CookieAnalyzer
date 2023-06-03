@@ -41,6 +41,10 @@ class CookieAnalyzer {
         const mostEfficientBuilding = this.getMostEfficientBuilding();
         this.mostEfficientBuilding = mostEfficientBuilding.building;
 
+        const canBuyBuilding = this.mostEfficientBuilding.getPrice() <= Game.cookies;
+        // It should probably be a button and disable it but is easier to use class toggles
+        this.DOM.mostEfficient.classList.toggle("noMoney", !canBuyBuilding);
+
         if(this.autobuy) this.mostEfficientBuilding.buy();
         
         if(this.autoclick) {
