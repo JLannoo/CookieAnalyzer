@@ -11,6 +11,7 @@ const CONSTANTS = {
     efficiencyId : "CAEfficiency",
 
     autoclickInterval: 5, // ms
+    UIRefreshInterval: 500, // m
     efficiencyFloatPrecision: 6,
 }
 
@@ -29,7 +30,7 @@ class CookieAnalyzer {
         }
 
         this.SetupUI();
-        this.refreshInterval = setInterval(this.refreshUI.bind(this), 1000);
+        this.refreshInterval = setInterval(this.refreshUI.bind(this), CONSTANTS.UIRefreshInterval);
         this.autoclickInterval = undefined;
     }
 
