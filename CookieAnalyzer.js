@@ -215,7 +215,8 @@ class CookieAnalyzer {
     }
     
     getAvailableBuildings(){
-        return Game.ObjectsById.filter(e => !e.locked);
+    getBuildingTotalCPS(building){
+        return building.storedCps * Game.globalCpsMult;
     }
     
     // CPSPCS: Cookies per second per cookie spent
@@ -224,7 +225,7 @@ class CookieAnalyzer {
         const building = this.getBuildingByID(buildingId);
     
         const price = building.getPrice();
-        const cps = building.cps(building);
+        const cps = this.getBuildingTotalCPS(building);
     
         return cps / price;
     }
