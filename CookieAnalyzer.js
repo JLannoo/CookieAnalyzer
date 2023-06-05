@@ -93,9 +93,10 @@ class CookieAnalyzer {
         this.setEfficiencyText(this.getMostEfficientBuilding());
 
         // Add checkboxes
-        const autoBuyContainer = this.createCheckbox("autobuy", "Autobuy?");
-        const autoClickContainer = this.createCheckbox("autoclick", "Autoclick?");
-        const autoClickGoldenContainer = this.createCheckbox("autoclickgolden", "Autoclick Golden Cookies?");
+        const autoBuyContainer = this.createInput("checkbox", "autobuy", "Autobuy?", "checked");
+        const autoClickContainer = this.createInput("checkbox", "autoclick", "Autoclick?", "checked");
+        const autoClickGoldenContainer = this.createInput("checkbox", "autoclickgolden", "Autoclick Golden Cookies?", "checked");
+
 
         dataContainer.appendChild(mostEfficient);
         dataContainer.appendChild(efficiency);
@@ -117,24 +118,25 @@ class CookieAnalyzer {
         this.DOM.efficiency.textContent = str;
     }
 
-    createCheckbox(name, label){
+    createInput(type, name, label, valueAccesor){
         const $container = document.createElement("div");
-        $container.classList.add("CACheckboxContainer");
+        $container.classList.add("CAInputContainer");
         
         const $label = document.createElement("label");
         $label.textContent = label;
         $label.setAttribute("for", name)
         
-        const $checkbox = document.createElement("input")
-        $checkbox.type ="checkbox";
-        $checkbox.name = name;
-        this.DOM[name] = $checkbox;
-        this[name] = $checkbox.checked;
-        $checkbox.classList.add("subButton");
-        $checkbox.addEventListener("change", (e) => this[name] = e.target.checked);
+        const $input = document.createElement("input")
+        $input.type = type;
+        $input.name = name;
+        $input.setAttribute("id", name);
+        this.DOM[name] = $input;
+        $input[valueAccesor] = this[name];
+        $input.classList.add("subButton");
+        $input.addEventListener("change", (e) => this[name] = e.target[valueAccesor]);
 
         $container.appendChild($label);
-        $container.appendChild($checkbox);
+        $container.appendChild($input);
 
         return $container;
     }
