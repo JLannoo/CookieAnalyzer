@@ -11,16 +11,20 @@ const CONSTANTS = {
     efficiencyId : "CAEfficiency",
 
     autoclickInterval: 5, // ms
-    UIRefreshInterval: 500, // m
+    UIRefreshInterval: 500, // ms
     efficiencyFloatPrecision: 6,
+
+    maxWaitTimeDefault: 15 // s
 }
 
 class CookieAnalyzer {
     constructor() {
-        this.mostEfficientBuilding = this.getMostEfficientBuilding().building;
         this.autobuy = this.DOM?.autobuy?.checked;
         this.autoclick = this.DOM?.autoclick?.checked;
         this.autoclickgolden = this.DOM?.autoclickgolden?.checked;
+        this.maxwaittime = CONSTANTS.maxWaitTimeDefault;
+        
+        this.mostEfficientBuilding = this.getMostEfficientBuilding()?.building;
 
         this.DOM = {
             container: undefined,
@@ -97,12 +101,15 @@ class CookieAnalyzer {
         const autoClickContainer = this.createInput("checkbox", "autoclick", "Autoclick?", "checked");
         const autoClickGoldenContainer = this.createInput("checkbox", "autoclickgolden", "Autoclick Golden Cookies?", "checked");
 
+        // Add inputs
+        const maxWaitContainer = this.createInput("number", "maxwaittime", "Max wait:", "value");
 
         dataContainer.appendChild(mostEfficient);
         dataContainer.appendChild(efficiency);
         dataContainer.appendChild(autoBuyContainer);
         dataContainer.appendChild(autoClickContainer);
         dataContainer.appendChild(autoClickGoldenContainer);
+        dataContainer.appendChild(maxWaitContainer);
         
         CAContainer.appendChild(dataContainer);
         adSpace.appendChild(CAContainer);
@@ -165,22 +172,32 @@ class CookieAnalyzer {
         const tooltip = building.tooltip();
 
         // Create new element structure
-        const newBlock = document.createElement("div");
-        newBlock.classList.add("descriptionBlock");
-        const boldText = document.createElement("b");
-        boldText.textContent = efficiency.toFixed(CONSTANTS.efficiencyFloatPrecision);
+        const efficiencyString = efficiency.toFixed(CONSTANTS.efficiencyFloatPrecision);
+        const efficiencyBlock = this.createTooltipBlock(efficiencyString, " CPSPCS");
 
-        newBlock.appendChild(boldText);
-        newBlock.innerHTML += " CPSPCS";
+        const timeLeftString = Math.floor(this.getSecondsToBuyBuilding(building));
+        const timeLeftBlock = this.createTooltipBlock(timeLeftString+"s", " left to afford this.");
 
-        const newBlockString = newBlock.outerHTML;
+        const newBlocksString = efficiencyBlock.outerHTML + timeLeftBlock.outerHTML;
 
         // Insert newBlock before the last </div> in the tooltip string
         const index = tooltip.lastIndexOf("</div>");
-        const ret = tooltip.substring(0, index) + newBlockString + tooltip.substring(index)
+        const ret = tooltip.substring(0, index) + newBlocksString + tooltip.substring(index)
 
         return ret;
+    }
+
+    createTooltipBlock(boldText, text){
+        const newBlock = document.createElement("div");
+        newBlock.classList.add("descriptionBlock");
         
+        const boldElement = document.createElement("b");
+        boldElement.textContent = boldText;
+        newBlock.appendChild(boldElement);
+
+        newBlock.innerHTML += text;
+
+        return newBlock;
     }
     
     
@@ -215,6 +232,15 @@ class CookieAnalyzer {
     }
     
     getAvailableBuildings(){
+        const buildings = Game.ObjectsById.filter(e => {
+            const isLocked = e.locked;
+            const canBuyInWait = this.getSecondsToBuyBuilding(e) <= Number(this.maxwaittime);
+
+            return (!isLocked && canBuyInWait);
+        });
+        return buildings;
+    }
+
     getBuildingTotalCPS(building){
         return building.storedCps * Game.globalCpsMult;
     }
@@ -250,6 +276,15 @@ class CookieAnalyzer {
         const sortedByEfficiency = buildings.sort((a,b) => b.efficiency - a.efficiency);
 
         return sortedByEfficiency;
+    }
+
+    getSecondsToBuyBuilding(building){
+        if(Game.cookies >= building.price) return 0;
+
+        const priceDelta = building.price - Game.cookies;
+        const timeLeft = priceDelta / Game.cookiesPs;
+
+        return timeLeft;
     }
 
     buyMostEfficient(){
@@ -344,10 +379,11 @@ class CookieAnalyzer {
         margin: 1rem;
     }
     
-    .CACheckboxContainer {
+    .CAInputContainer {
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 0.1rem;
     }
     `;
 
