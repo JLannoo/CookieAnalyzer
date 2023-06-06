@@ -50,6 +50,7 @@ class CookieAnalyzer {
     refreshUI(){        
         // Get most efficient building
         const mostEfficientBuilding = this.getMostEfficientBuilding();
+      	if(!mostEfficientBuilding) return;
         this.mostEfficientBuilding = mostEfficientBuilding.building;
 
         const canBuyBuilding = this.mostEfficientBuilding.getPrice() <= Game.cookies;
@@ -121,6 +122,8 @@ class CookieAnalyzer {
     }
 
     setMostEfficientText(){
+      	if(!this.mostEfficientBuilding) return;
+      
         const name = this.mostEfficientBuilding.name;
         const timeLeft = Math.floor(this.getSecondsToBuyBuilding(this.mostEfficientBuilding));
         const timeLeftStr = timeLeft ? `(${timeLeft}s left)` : "";
@@ -129,6 +132,8 @@ class CookieAnalyzer {
     }
 
     setEfficiencyText(building){
+      	if(!building) return;
+      
         const str = `Efficiency: ${building.efficiency.toFixed(CONSTANTS.efficiencyFloatPrecision)} CPSPCS`;
         this.DOM.efficiency.textContent = str;
     }
