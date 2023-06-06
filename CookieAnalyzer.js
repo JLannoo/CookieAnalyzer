@@ -50,7 +50,7 @@ class CookieAnalyzer {
     refreshUI(){        
         // Get most efficient building
         const mostEfficientBuilding = this.getMostEfficientBuilding();
-      	if(!mostEfficientBuilding) return;
+        if(!mostEfficientBuilding) return;
         this.mostEfficientBuilding = mostEfficientBuilding.building;
 
         const canBuyBuilding = this.mostEfficientBuilding.getPrice() <= Game.cookies;
@@ -122,18 +122,18 @@ class CookieAnalyzer {
     }
 
     setMostEfficientText(){
-      	if(!this.mostEfficientBuilding) return;
-      
+        if(!this.mostEfficientBuilding) return;
+
         const name = this.mostEfficientBuilding.name;
-        const timeLeft = Math.floor(this.getSecondsToBuyBuilding(this.mostEfficientBuilding));
-        const timeLeftStr = timeLeft ? `(${timeLeft}s left)` : "";
+        const timeLeft = Game.sayTime(Math.floor(this.getSecondsToBuyBuilding(this.mostEfficientBuilding))*Game.fps,-1);
+        const timeLeftStr = timeLeft ? `<br/>(${timeLeft} left)` : "";
         const str = `Buy: ${name} ${timeLeftStr}`;
-        this.DOM.mostEfficient.textContent = str;
+        this.DOM.mostEfficient.innerHTML = str;
     }
 
     setEfficiencyText(building){
-      	if(!building) return;
-      
+        if(!building) return;
+
         const str = `Efficiency: ${building.efficiency.toFixed(CONSTANTS.efficiencyFloatPrecision)} CPSPCS`;
         this.DOM.efficiency.textContent = str;
     }
@@ -191,8 +191,12 @@ class CookieAnalyzer {
         const efficiencyString = efficiency.toFixed(CONSTANTS.efficiencyFloatPrecision);
         const efficiencyBlock = this.createTooltipBlock(efficiencyString, " CPSPCS");
 
-        const timeLeftString = Math.floor(this.getSecondsToBuyBuilding(building));
-        const timeLeftBlock = this.createTooltipBlock(timeLeftString+"s", " left to afford this.");
+        const secondsLeft = Math.floor(this.getSecondsToBuyBuilding(building))
+        const timeLeftString = Game.sayTime(secondsLeft*Game.fps,-1);
+        const timeLeftBlock = this.createTooltipBlock(
+            secondsLeft ? timeLeftString : "You can buy this", 
+            secondsLeft ? " left to afford this" : ""
+        );
 
         const newBlocks = [
             efficiencyBlock,
