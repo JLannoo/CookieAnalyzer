@@ -14,17 +14,19 @@ const CONSTANTS = {
     UIRefreshInterval: 500, // ms
     efficiencyFloatPrecision: 6,
 
-    maxWaitTimeDefault: 15 // s
+    maxWaitTimeDefault: 15, // s
+
+    localStorageName: "CAConfig",
 }
 
 class CookieAnalyzer {
     constructor() {
-        this.autobuy = this.DOM?.autobuy?.checked;
-        this.autoclick = this.DOM?.autoclick?.checked;
-        this.autoclickgolden = this.DOM?.autoclickgolden?.checked;
-        this.maxwaittime = CONSTANTS.maxWaitTimeDefault;
-        
-        this.mostEfficientBuilding = this.getMostEfficientBuilding()?.building;
+        this.config = {
+            autobuy: this.DOM?.autobuy?.checked,
+            autoclick: this.DOM?.autoclick?.checked,
+            autoclickgolden: this.DOM?.autoclickgolden?.checked,
+            maxwaittime: CONSTANTS.maxWaitTimeDefault,
+        }
 
         this.DOM = {
             container: undefined,
@@ -33,15 +35,19 @@ class CookieAnalyzer {
             efficiency: undefined,
             autobuy: undefined,
         }
+        
+        this.mostEfficientBuilding = this.getMostEfficientBuilding()?.building;
 
         this.SetupUI();
         this.refreshInterval = setInterval(this.refreshUI.bind(this), CONSTANTS.UIRefreshInterval);
         this.autoclickInterval = undefined;
+
+        console.log('%cCookieAnalyzer correctly initialized', 'color: green; font-size: 40px; font-weight: bold; text-shadow: 2px 2px 0px #000000;');
     }
 
     // ===== DOM MANIPULATION ======
     //   === UI ===
-    refreshUI(){
+    refreshUI(){        
         // Get most efficient building
         const mostEfficientBuilding = this.getMostEfficientBuilding();
         this.mostEfficientBuilding = mostEfficientBuilding.building;
@@ -50,21 +56,20 @@ class CookieAnalyzer {
         // It should probably be a button and disable it but is easier to use class toggles
         this.DOM.mostEfficient.classList.toggle("noMoney", !canBuyBuilding);
 
-        if(this.autobuy) this.mostEfficientBuilding.buy();
-        if(this.autoclickgolden) this.autoClickGoldenCoookies();
-        this.updateAutoclick();
-
         this.highlightBuilding(this.mostEfficientBuilding.name);
         this.setMostEfficientText();
         this.setEfficiencyText(mostEfficientBuilding);
+        
+        if(this.config.autobuy) this.mostEfficientBuilding.buy();
+        if(this.config.autoclickgolden) this.autoClickGoldenCoookies();
+        this.updateAutoclick();
     }
     
     SetupUI(){
+        this.loadConfig();
+        
         // Replace tooltip function
         this.setupTooltipExtension();
-
-        // Clear previous refresh interval (probably doesn't work)
-        if(this.refreshInterval) clearInterval(this.refreshInterval);
 
         // Select and clear parent element
         const adSpace = document.querySelector(CONSTANTS.adElementSelector);
@@ -141,9 +146,12 @@ class CookieAnalyzer {
         $input.name = name;
         $input.setAttribute("id", name);
         this.DOM[name] = $input;
-        $input[valueAccesor] = this[name];
+        $input[valueAccesor] = this.config[name];
         $input.classList.add("subButton");
-        $input.addEventListener("change", (e) => this[name] = e.target[valueAccesor]);
+        $input.addEventListener("change", (e) => {
+            this.config[name] = e.target[valueAccesor];
+            this.writeConfig();
+        });
 
         $container.appendChild($label);
         $container.appendChild($input);
@@ -242,7 +250,8 @@ class CookieAnalyzer {
     getAvailableBuildings(){
         const buildings = Game.ObjectsById.filter(e => {
             const isLocked = e.locked;
-            const canBuyInWait = this.getSecondsToBuyBuilding(e) <= Number(this.maxwaittime);
+            // Ignore wait limit if it doesn't exist
+            const canBuyInWait = this.config.maxwaittime ? this.getSecondsToBuyBuilding(e) <= Number(this.config.maxwaittime) : true;
 
             return (!isLocked && canBuyInWait);
         });
@@ -309,7 +318,7 @@ class CookieAnalyzer {
     }
 
     updateAutoclick(){
-        if(this.autoclick) {
+        if(this.config.autoclick) {
             if(!this.autoclickInterval) {
                 this.setAutoclick();
             }
@@ -327,6 +336,18 @@ class CookieAnalyzer {
     removeAutoClick(){
         clearInterval(this.autoclickInterval);
         this.autoclickInterval = undefined;
+    }
+
+    // ===== SAVE =====
+    writeConfig(){
+        localStorage.setItem(CONSTANTS.localStorageName, JSON.stringify(this.config));
+    }
+
+    loadConfig(){
+        const lsConfig = localStorage.getItem(CONSTANTS.localStorageName);
+        if(!lsConfig) return;
+
+        this.config = JSON.parse(lsConfig);
     }
 }
 
