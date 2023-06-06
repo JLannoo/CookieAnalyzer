@@ -116,7 +116,10 @@ class CookieAnalyzer {
     }
 
     setMostEfficientText(){
-        const str = `Buy: ${this.mostEfficientBuilding.name}`;
+        const name = this.mostEfficientBuilding.name;
+        const timeLeft = Math.floor(this.getSecondsToBuyBuilding(this.mostEfficientBuilding));
+        const timeLeftStr = timeLeft ? `(${timeLeft}s left)` : "";
+        const str = `Buy: ${name} ${timeLeftStr}`;
         this.DOM.mostEfficient.textContent = str;
     }
 
@@ -371,6 +374,12 @@ class CookieAnalyzer {
         font-size: 1rem;
 
         margin: 1rem;
+    }
+    
+    .CAContainer .subButton{
+        position: initial;
+        background-color: rgba(0,0,0,0.2);
+        color: white;
     }
     
     .CAEfficiency {
