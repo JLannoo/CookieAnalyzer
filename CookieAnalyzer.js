@@ -181,7 +181,12 @@ class CookieAnalyzer {
         const timeLeftString = Math.floor(this.getSecondsToBuyBuilding(building));
         const timeLeftBlock = this.createTooltipBlock(timeLeftString+"s", " left to afford this.");
 
-        const newBlocksString = efficiencyBlock.outerHTML + timeLeftBlock.outerHTML;
+        const newBlocks = [
+            efficiencyBlock,
+            timeLeftBlock,
+        ];
+
+        const newBlocksString = newBlocks.map(e => e.outerHTML).join("");
 
         // Insert newBlock before the last </div> in the tooltip string
         const index = tooltip.lastIndexOf("</div>");
